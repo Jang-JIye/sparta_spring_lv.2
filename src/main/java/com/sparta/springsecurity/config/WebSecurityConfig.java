@@ -7,11 +7,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
 public class WebSecurityConfig {
+
+    @Bean //비빌번호 암호화 기능 등록
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -26,16 +33,10 @@ public class WebSecurityConfig {
         // CSRF 설정
         http.csrf().disable();
 
-        http.authorizeRequests()
-                .antMatchers("/h2-console/**").permitAll()
-                .antMatchers("/css/**").permitAll()
-                .antMatchers("/js/**").permitAll()
-                .antMatchers("/images/**").permitAll()
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                .anyRequest().authenticated();
+        http.authorizeRequests().anyRequest().authenticated();
 
-        // 로그인 사용
-        http.formLogin();
+        // Custom 로그인 페이지 적용하기
+        http.formLogin().loginPage("/api/user/login-page").permitAll();
 
         return http.build();
     }
