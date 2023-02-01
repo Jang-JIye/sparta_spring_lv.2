@@ -13,16 +13,18 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
+@EnableGlobalMethodSecurity(securedEnabled = true) // @Secured 어노테이션 활성화
 public class WebSecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
 
-    @Bean //비빌번호 암호화 기능 등록
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -43,11 +45,14 @@ public class WebSecurityConfig {
         http.authorizeRequests().antMatchers("/api/user/**").permitAll()
                 .anyRequest().authenticated();
 
-        // Custom 로그인 페이지 적용하기
+        // Custom 로그인 페이지 사용
         http.formLogin().loginPage("/api/user/login-page").permitAll();
 
-        //Custom Filter 등록하기
+        // Custom Filter 등록하기
         http.addFilterBefore(new CustomSecurityFilter(userDetailsService, passwordEncoder()), UsernamePasswordAuthenticationFilter.class);
+
+        // 접근 제한 페이지 이동 설정
+        http.exceptionHandling().accessDeniedPage("/api/user/forbidden");
 
         return http.build();
     }
