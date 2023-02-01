@@ -5,6 +5,8 @@ import com.sparta.springsecurity.entity.User;
 import com.sparta.springsecurity.entity.UserRoleEnum;
 import com.sparta.springsecurity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal; //UserDetails를 구현하여 만든 Principal 인스턴스를 쉼게 얻을 수 있다.
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -56,6 +58,16 @@ public class UserController {
 
         User user = new User(username, password, role);
         userRepository.save(user);
+
+        return "redirect:/api/user/login-page";
+    }
+
+    @PostMapping("/login")
+    public String login(@AuthenticationPrincipal UserDetails userDetails) {
+        System.out.println("*********************************************************");
+        System.out.println("UserController.login");
+        System.out.println("userDetails.getUsername() = " + userDetails.getUsername());
+        System.out.println("*********************************************************");
 
         return "redirect:/api/user/login-page";
     }
